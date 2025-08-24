@@ -728,6 +728,172 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+
+      {/* Modal para Nueva Membresía */}
+      {showNewMembershipModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Nueva Membresía</h3>
+            
+            <form onSubmit={handleCreateMembership} className="space-y-6">
+              {/* Selección de Cliente */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cliente *
+                </label>
+                <select
+                  required
+                  value={newMembership.client_id}
+                  onChange={(e) => setNewMembership(prev => ({ ...prev, client_id: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
+                >
+                  <option value="">Seleccionar cliente...</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name} - {client.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Categoría */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoría *
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {Object.entries(membershipCategories).map(([key, category]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => updateMembershipPricing(key, newMembership.plan)}
+                      className={`p-3 rounded-lg border text-center transition-all duration-200 ${
+                        newMembership.category === key
+                          ? 'border-[#37b7ff] bg-[#37b7ff]/10 text-[#37b7ff]'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{category.title}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Plan */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Plan *
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {Object.entries(membershipCategories[newMembership.category as keyof typeof membershipCategories].plans).map(([planKey, planData]) => (
+                    <button
+                      key={planKey}
+                      type="button"
+                      onClick={() => updateMembershipPricing(newMembership.category, planKey)}
+                      className={`p-3 rounded-lg border text-center transition-all duration-200 ${
+                        newMembership.plan === planKey
+                          ? 'border-[#37b7ff] bg-[#37b7ff]/10 text-[#37b7ff]'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-medium text-sm capitalize">{planKey}</div>
+                      <div className="text-xs text-gray-500">${planData.monthly}/mes</div>
+                      <div className="text-xs text-gray-500">{planData.sessions} sesiones</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Áreas */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Áreas a tratar *
+                </label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                  {membershipCategories[newMembership.category as keyof typeof membershipCategories].areas.map((area) => (
+                    <label key={area} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newMembership.areas.includes(area)}
+                        onChange={() => handleAreaToggle(area)}
+                        className="rounded border-gray-300 text-[#37b7ff] focus:ring-[#37b7ff]"
+                      />
+                      <span className="text-sm text-gray-700">{area}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Seleccionadas: {newMembership.areas.length}
+                </p>
+              </div>
+
+              {/* Resumen */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-2">Resumen de la Membresía</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Plan:</span>
+                    <span className="capitalize">{newMembership.plan} - {membershipCategories[newMembership.category as keyof typeof membershipCategories].title}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pago mensual:</span>
+                    <span className="font-medium">${newMembership.monthly_payment}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total sesiones:</span>
+                    <span>{newMembership.total_sessions}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Áreas seleccionadas:</span>
+                    <span>{newMembership.areas.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fecha de inicio */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de inicio
+                </label>
+                <input
+                  type="date"
+                  value={newMembership.start_date}
+                  onChange={(e) => setNewMembership(prev => ({ ...prev, start_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewMembershipModal(false);
+                    setNewMembership({
+                      client_id: '',
+                      category: 'medianas',
+                      plan: 'completa',
+                      areas: [],
+                      monthly_payment: 0,
+                      total_sessions: 9,
+                      start_date: new Date().toISOString().split('T')[0],
+                      next_payment_date: ''
+                    });
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#37b7ff] text-white rounded-lg hover:bg-[#2da7ef] transition-colors duration-200"
+                >
+                  Crear Membresía
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
