@@ -127,16 +127,6 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
-            <p className="text-white/80 text-sm text-center mb-2">
-              <strong>Credenciales de demostración:</strong>
-            </p>
-            <div className="text-center space-y-1">
-              <p className="text-white/70 text-sm">Usuario: <code className="bg-white/10 px-2 py-1 rounded">admin</code></p>
-              <p className="text-white/70 text-sm">Contraseña: <code className="bg-white/10 px-2 py-1 rounded">dermasilk2024</code></p>
-            </div>
-          </div>
         </div>
 
         {/* Back to Site */}

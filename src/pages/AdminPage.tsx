@@ -60,6 +60,34 @@ interface RewardTransaction {
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  
+  // Verificar autenticación al cargar el componente
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const loginTime = localStorage.getItem('loginTime');
+    
+    // Si no está autenticado, redirigir al login
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    // Verificar si la sesión ha expirado (24 horas)
+    if (loginTime) {
+      const loginDate = new Date(loginTime);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursDiff > 24) {
+        // Sesión expirada
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('loginTime');
+        navigate('/login');
+        return;
+      }
+    }
+  }, [navigate]);
+  
   const [clients, setClients] = useState<Client[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [rewardTransactions, setRewardTransactions] = useState<RewardTransaction[]>([]);
