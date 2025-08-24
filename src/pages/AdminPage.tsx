@@ -561,12 +561,245 @@ const AdminPage = () => {
 
         {/* Other tabs content */}
         {activeTab === 'memberships' && (
-          <MembershipsTab 
-            clients={clients}
-            memberships={memberships}
-            onMembershipCreated={loadData}
-            onMembershipUpdated={loadData}
-          />
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <CreditCard className="text-blue-600" size={24} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Membresías</p>
+                    <p className="text-2xl font-bold text-gray-900">{memberships.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Users className="text-green-600" size={24} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Activas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {memberships.filter(m => m.status === 'active').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Clock className="text-yellow-600" size={24} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Pausadas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {memberships.filter(m => m.status === 'paused').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Award className="text-purple-600" size={24} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Completadas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {memberships.filter(m => m.status === 'completed').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <DollarSign className="text-indigo-600" size={24} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Ingresos/Mes</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      ${memberships.filter(m => m.status === 'active').reduce((sum, m) => sum + Number(m.monthly_payment), 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Memberships Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Membresías ({memberships.length})
+                </h3>
+                <button
+                  onClick={() => alert('Funcionalidad de nueva membresía en desarrollo')}
+                  className="bg-[#37b7ff] text-white px-4 py-2 rounded-lg hover:bg-[#2da7ef] transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <CreditCard size={20} />
+                  <span>Nueva Membresía</span>
+                </button>
+              </div>
+              
+              {memberships.length === 0 ? (
+                <div className="p-12 text-center">
+                  <CreditCard className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No hay membresías</h3>
+                  <p className="text-gray-500 mb-6">
+                    Comienza creando la primera membresía para un cliente
+                  </p>
+                  <button
+                    onClick={() => alert('Funcionalidad de nueva membresía en desarrollo')}
+                    className="bg-[#37b7ff] text-white px-4 py-2 rounded-lg hover:bg-[#2da7ef] transition-colors duration-200 flex items-center space-x-2 mx-auto"
+                  >
+                    <CreditCard size={20} />
+                    <span>Crear Primera Membresía</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Cliente
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Plan
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Áreas
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Progreso
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Pago
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {memberships.map((membership) => {
+                        const client = clients.find(c => c.id === membership.client_id);
+                        const progress = (membership.completed_sessions / membership.total_sessions) * 100;
+                        
+                        return (
+                          <tr key={membership.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 bg-[#37b7ff] rounded-full flex items-center justify-center">
+                                  <span className="text-white font-medium">
+                                    {client?.name?.charAt(0).toUpperCase() || '?'}
+                                  </span>
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {client?.name || 'Cliente no encontrado'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {client?.email}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 capitalize">
+                                {membership.plan}
+                              </div>
+                              <div className="text-sm text-gray-500 capitalize">
+                                {membership.category}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-wrap gap-1">
+                                {membership.areas.slice(0, 2).map((area, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                  >
+                                    {area}
+                                  </span>
+                                ))}
+                                {membership.areas.length > 2 && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    +{membership.areas.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {membership.completed_sessions}/{membership.total_sessions}
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                <div
+                                  className="bg-[#37b7ff] h-2 rounded-full"
+                                  style={{ width: `${progress}%` }}
+                                ></div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                ${Number(membership.monthly_payment).toLocaleString()}/mes
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {membership.next_payment_date ? 
+                                  new Date(membership.next_payment_date).toLocaleDateString('es-ES') : 
+                                  'No programado'
+                                }
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                membership.status === 'active' ? 'bg-green-100 text-green-800' :
+                                membership.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                                membership.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {membership.status === 'active' ? 'Activa' :
+                                 membership.status === 'paused' ? 'Pausada' :
+                                 membership.status === 'completed' ? 'Completada' :
+                                 'Cancelada'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button 
+                                onClick={() => alert('Funcionalidad de edición en desarrollo')}
+                                className="text-[#37b7ff] hover:text-[#2da7ef] mr-3"
+                                title="Editar membresía"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button 
+                                onClick={() => alert('Funcionalidad de eliminación en desarrollo')}
+                                className="text-red-600 hover:text-red-900"
+                                title="Eliminar membresía"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {activeTab === 'rewards' && (
