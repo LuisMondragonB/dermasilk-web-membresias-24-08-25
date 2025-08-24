@@ -18,7 +18,8 @@ import {
   Star,
   TrendingUp,
   DollarSign,
-  Clock
+  Clock,
+  Award
 } from 'lucide-react';
 
 interface Client {
