@@ -108,21 +108,36 @@ const ClientForm = ({ client, onSave, onCancel }: {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    console.log('Enviando datos del cliente:', formData); // Debug
 
     try {
       if (client) {
+        console.log('Actualizando cliente existente:', client.id);
         await supabase
           .from('clients')
           .update(formData)
           .eq('id', client.id);
       } else {
-        await supabase
+        console.log('Creando nuevo cliente');
+        const { data, error } = await supabase
           .from('clients')
           .insert([formData]);
+        
+        if (error) {
+          console.error('Error al crear cliente:', error);
+          alert('Error al crear cliente: ' + error.message);
+          return;
+        }
+        
+        console.log('Cliente creado exitosamente:', data);
       }
+      
+      alert(client ? 'Cliente actualizado exitosamente' : 'Cliente creado exitosamente');
       onSave();
     } catch (error) {
       console.error('Error saving client:', error);
+      alert('Error al guardar cliente: ' + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -597,6 +612,8 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    console.log('Obteniendo datos de Supabase...');
+    
     try {
       const [clientsRes, membershipsRes, appointmentsRes] = await Promise.all([
         supabase.from('clients').select('*').order('created_at', { ascending: false }),
@@ -610,11 +627,18 @@ const Dashboard = () => {
         `).order('appointment_date', { ascending: false })
       ]);
 
+      console.log('Respuesta de clientes:', clientsRes);
+      console.log('Respuesta de membresías:', membershipsRes);
+      console.log('Respuesta de citas:', appointmentsRes);
+
       if (clientsRes.data) setClients(clientsRes.data);
       if (membershipsRes.data) setMemberships(membershipsRes.data);
       if (appointmentsRes.data) setAppointments(appointmentsRes.data);
+      
+      console.log('Datos cargados - Clientes:', clientsRes.data?.length || 0);
     } catch (error) {
       console.error('Error fetching data:', error);
+      alert('Error al cargar datos: ' + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -656,22 +680,56 @@ const Dashboard = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 space-y-4 sm:space-y-0">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Panel Dermasilk®</h1>
               <p className="text-gray-600">Sistema de gestión de membresías y clientes</p>
             </div>
-            <button
-              onClick={() => {
-                setModalType('client');
-                setSelectedClient(null);
-                setShowModal(true);
-              }}
-              className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2"
-            >
-              <UserPlus size={20} />
-              <span>Nuevo Cliente</span>
-            </button>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => {
+                  setModalType('client');
+                  setSelectedClient(null);
+                  setShowModal(true);
+                }}
+                className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2 shadow-lg"
+              >
+                <UserPlus size={20} />
+                <span>Nuevo Cliente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions Bar */}
+      <div className="bg-gray-50 border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600">
+                Acciones rápidas:
+              </div>
+              <button
+                onClick={() => {
+                  setModalType('client');
+                  setSelectedClient(null);
+                  setShowModal(true);
+                }}
+                className="text-[#37b7ff] hover:text-[#2da7ef] text-sm font-medium flex items-center space-x-1"
+              >
+                <UserPlus size={16} />
+                <span>Agregar Cliente</span>
+              </button>
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date().toLocaleDateString('es-MX', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -703,6 +761,20 @@ const Dashboard = () => {
           </nav>
         </div>
       </div>
+              onClick={() => {
+                setModalType('client');
+                setSelectedClient(null);
+                setShowModal(true);
+              }}
+              className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2"
+            >
+              <UserPlus size={20} />
+              <span>Nuevo Cliente</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -818,10 +890,71 @@ const Dashboard = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
                 />
               </div>
+              <button
+                onClick={() => {
+                  setModalType('client');
+                  setSelectedClient(null);
+                  setShowModal(true);
+                }}
+                className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2 whitespace-nowrap"
+              >
+                <UserPlus size={20} />
+                <span>Nuevo Cliente</span>
+              </button>
+            </div>
+
+            {/* Debug Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <h4 className="font-semibold text-blue-900 mb-2">Estado del Sistema</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-700">Clientes cargados:</span>
+                  <span className="font-bold ml-2">{clients.length}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Membresías:</span>
+                  <span className="font-bold ml-2">{memberships.length}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Citas:</span>
+                  <span className="font-bold ml-2">{appointments.length}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Búsqueda:</span>
+                  <span className="font-bold ml-2">{filteredClients.length}</span>
+                </div>
+              </div>
             </div>
 
             {/* Clients Table */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              {filteredClients.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {clients.length === 0 ? 'No hay clientes registrados' : 'No se encontraron clientes'}
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    {clients.length === 0 
+                      ? 'Comienza agregando tu primer cliente al sistema'
+                      : 'Intenta con otros términos de búsqueda'
+                    }
+                  </p>
+                  {clients.length === 0 && (
+                    <button
+                      onClick={() => {
+                        setModalType('client');
+                        setSelectedClient(null);
+                        setShowModal(true);
+                      }}
+                      className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2 mx-auto"
+                    >
+                      <UserPlus size={20} />
+                      <span>Agregar Primer Cliente</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
@@ -926,6 +1059,7 @@ const Dashboard = () => {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </div>
         )}
