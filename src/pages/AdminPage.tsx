@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
   Users, 
@@ -19,7 +20,8 @@ import {
   TrendingUp,
   DollarSign,
   Clock,
-  Award
+  Award,
+  LogOut
 } from 'lucide-react';
 
 interface Client {
@@ -57,6 +59,7 @@ interface RewardTransaction {
 }
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [rewardTransactions, setRewardTransactions] = useState<RewardTransaction[]>([]);
@@ -195,6 +198,13 @@ const AdminPage = () => {
     });
     setShowEditClientModal(true);
   };
+  const handleLogout = () => {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      // Aquí puedes agregar lógica de logout si tienes autenticación
+      navigate('/');
+    }
+  };
+
 
   const handleUpdateClient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,13 +312,23 @@ const AdminPage = () => {
               <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
               <span className="text-sm text-gray-500">Dermasilk®</span>
             </div>
-            <button
-              onClick={() => setShowNewClientModal(true)}
-              className="bg-[#37b7ff] text-white px-4 py-2 rounded-lg hover:bg-[#2da7ef] transition-colors duration-200 flex items-center space-x-2"
-            >
-              <UserPlus size={20} />
-              <span>Nuevo Cliente</span>
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowNewClientModal(true)}
+                className="bg-[#37b7ff] text-white px-4 py-2 rounded-lg hover:bg-[#2da7ef] transition-colors duration-200 flex items-center space-x-2"
+              >
+                <UserPlus size={20} />
+                <span>Nuevo Cliente</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center space-x-2"
+                title="Cerrar sesión"
+              >
+                <LogOut size={20} />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
