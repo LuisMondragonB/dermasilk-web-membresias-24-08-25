@@ -772,6 +772,7 @@ const Dashboard = () => {
               <span>Nuevo Cliente</span>
             </button>
           </div>
+          </div>
         </div>
       </div>
 
