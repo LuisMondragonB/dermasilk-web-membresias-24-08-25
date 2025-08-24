@@ -79,6 +79,20 @@ const AdminPage = () => {
     email: '',
     phone: ''
   });
+
+  // Estados para membresías
+  const [showNewMembershipModal, setShowNewMembershipModal] = useState(false);
+  const [newMembership, setNewMembership] = useState({
+    client_id: '',
+    category: 'medianas',
+    plan: 'completa',
+    areas: [] as string[],
+    monthly_payment: 0,
+    total_sessions: 9,
+    start_date: new Date().toISOString().split('T')[0],
+    next_payment_date: ''
+  });
+
   // Cargar datos iniciales
   useEffect(() => {
     loadData();
@@ -547,10 +561,12 @@ const AdminPage = () => {
 
         {/* Other tabs content */}
         {activeTab === 'memberships' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Membresías</h3>
-            <p className="text-gray-500">Gestión de membresías - En desarrollo</p>
-          </div>
+          <MembershipsTab 
+            clients={clients}
+            memberships={memberships}
+            onMembershipCreated={loadData}
+            onMembershipUpdated={loadData}
+          />
         )}
 
         {activeTab === 'rewards' && (
