@@ -685,7 +685,7 @@ const Dashboard = () => {
               <h1 className="text-3xl font-bold text-gray-900">Panel Dermasilk®</h1>
               <p className="text-gray-600">Sistema de gestión de membresías y clientes</p>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex justify-end">
               <button
                 onClick={() => {
                   setModalType('client');
@@ -761,21 +761,6 @@ const Dashboard = () => {
           </nav>
         </div>
       </div>
-              onClick={() => {
-                setModalType('client');
-                setSelectedClient(null);
-                setShowModal(true);
-              }}
-              className="bg-[#37b7ff] text-white px-6 py-3 rounded-xl hover:bg-[#2da7ef] transition-colors flex items-center space-x-2"
-            >
-              <UserPlus size={20} />
-              <span>Nuevo Cliente</span>
-            </button>
-          </div>
-          </div>
-        </div>
-      </div>
-
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
