@@ -1,18 +1,17 @@
 import HomePage from "./pages/HomePage";
 import MembershipsPage from "./pages/MembershipsPage";
-import AdminPage from "./pages/AdminPage"; // <-- 1. IMPORTA LA NUEVA PÁGINA
+import AdminPage from "./pages/AdminPage";
 import Navigation from "./components/Layout/Navigation";
-import { Routes, Route } from "react-router-dom";  // Remueve BrowserRouter as Router
+import { Routes, Route } from "react-router-dom";
 
 function App() {
-  // 2. USA EL ROUTER PARA MANEJAR LAS PÁGINAS
   return (
     <>
       <Navigation />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/membresias" element={<MembershipsPage />} />
-        <Route path="/admin" element={<AdminPage />} /> {/* <-- 3. AÑADE LA RUTA DEL PANEL */}
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </>
   );
