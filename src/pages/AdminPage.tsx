@@ -200,8 +200,12 @@ const AdminPage = () => {
   };
   const handleLogout = () => {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      // Aquí puedes agregar lógica de logout si tienes autenticación
-      navigate('/');
+      // Limpiar estado de autenticación
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('loginTime');
+      
+      // Redirigir al login
+      navigate('/login');
     }
   };
 
