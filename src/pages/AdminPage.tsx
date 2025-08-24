@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { 
   Users, 
   UserPlus, 
@@ -64,10 +65,16 @@ const AdminPage = () => {
   // Verificar autenticación al cargar el componente
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
-    const loginTime = localStorage.getItem('loginTime');
+  const handleLogout = async () => {
     
+      // Cerrar sesión en Supabase
+      await supabase.auth.signOut();
+      
+      // Limpiar localStorage
     // Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
+      localStorage.removeItem('userEmail');
+      
       navigate('/login');
       return;
     }
@@ -216,25 +223,39 @@ const AdminPage = () => {
       alert('Error inesperado al crear cliente');
     }
   };
-
-  const handleEditClient = (client: Client) => {
-    setEditingClient(client);
-    setEditClient({
-      name: client.name,
-      email: client.email,
-      phone: client.phone || ''
-    });
-    setShowEditClientModal(true);
-  };
-  const handleLogout = () => {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      // Limpiar estado de autenticación
-      localStorage.removeItem('isAuthenticated');
-      localStorage.removeItem('loginTime');
+    // Verificar autenticación con Supabase
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Redirigir al login
-      navigate('/login');
-    }
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+      
+      // También verificar localStorage como respaldo
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      const loginTime = localStorage.getItem('loginTime');
+      
+      if (!isAuthenticated || !loginTime) {
+        navigate('/login');
+        return;
+      }
+      
+      // Verificar si la sesión ha expirado (24 horas)
+      const loginDate = new Date(loginTime);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursDiff > 24) {
+        await supabase.auth.signOut();
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('loginTime');
+        localStorage.removeItem('userEmail');
+        navigate('/login');
+      }
+    };
+    
+    checkAuth();
   };
 
 

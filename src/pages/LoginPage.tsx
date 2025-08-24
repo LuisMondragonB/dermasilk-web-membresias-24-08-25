@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, Eye, EyeOff, Shield } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -17,16 +18,27 @@ const LoginPage = () => {
     setError('');
     setLoading(true);
 
-    // Simulación de autenticación (reemplazar con lógica real)
-    if (credentials.username === 'admin' && credentials.password === 'dermasilk2024') {
-      // Guardar estado de autenticación
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('loginTime', new Date().toISOString());
-      
-      // Redirigir al panel de administración
-      navigate('/admin');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+    try {
+      // Intentar autenticación con Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.username,
+        password: credentials.password
+      });
+
+      if (error) {
+        setError('Usuario o contraseña incorrectos');
+      } else if (data.user) {
+        // Guardar estado de autenticación
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('loginTime', new Date().toISOString());
+        localStorage.setItem('userEmail', data.user.email || '');
+        
+        // Redirigir al panel de administración
+        navigate('/admin');
+      }
+    } catch (err) {
+      console.error('Error de autenticación:', err);
+      setError('Error de conexión. Intenta de nuevo.');
     }
     
     setLoading(false);
@@ -63,17 +75,17 @@ const LoginPage = () => {
             {/* Username Field */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Usuario
+                Email
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={credentials.username}
                   onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent backdrop-blur-sm"
-                  placeholder="Ingresa tu usuario"
+                  placeholder="Ingresa tu email"
                 />
               </div>
             </div>
