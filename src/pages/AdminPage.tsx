@@ -63,6 +63,8 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Estados para el formulario de nuevo cliente
   const [newClient, setNewClient] = useState({
@@ -71,6 +73,12 @@ const AdminPage = () => {
     phone: ''
   });
 
+  // Estados para el formulario de edición
+  const [editClient, setEditClient] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  });
   // Cargar datos iniciales
   useEffect(() => {
     loadData();
@@ -160,6 +168,86 @@ const AdminPage = () => {
     } catch (error) {
       console.error('Error:', error);
       alert('Error inesperado al crear cliente');
+    }
+  };
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setEditClient({
+      name: client.name,
+      email: client.email,
+      phone: client.phone || ''
+    });
+    setShowEditClientModal(true);
+  };
+
+  const handleUpdateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editClient.name || !editClient.email || !editingClient) {
+      alert('Nombre y email son obligatorios');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .update({
+          name: editClient.name,
+          email: editClient.email,
+          phone: editClient.phone || null
+        })
+        .eq('id', editingClient.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating client:', error);
+        alert('Error al actualizar cliente: ' + error.message);
+        return;
+      }
+
+      // Actualizar la lista de clientes
+      setClients(prev => prev.map(client => 
+        client.id === editingClient.id ? data : client
+      ));
+      
+      // Limpiar formulario y cerrar modal
+      setEditClient({ name: '', email: '', phone: '' });
+      setEditingClient(null);
+      setShowEditClientModal(false);
+      
+      alert('Cliente actualizado exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error inesperado al actualizar cliente');
+    }
+  };
+
+  const handleDeleteClient = async (client: Client) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar a ${client.name}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', client.id);
+
+      if (error) {
+        console.error('Error deleting client:', error);
+        alert('Error al eliminar cliente: ' + error.message);
+        return;
+      }
+
+      // Actualizar la lista de clientes
+      setClients(prev => prev.filter(c => c.id !== client.id));
+      
+      alert('Cliente eliminado exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error inesperado al eliminar cliente');
     }
   };
 
@@ -432,10 +520,18 @@ const AdminPage = () => {
                             {new Date(client.created_at).toLocaleDateString('es-ES')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button className="text-[#37b7ff] hover:text-[#2da7ef] mr-3">
+                            <button 
+                              onClick={() => handleEditClient(client)}
+                              className="text-[#37b7ff] hover:text-[#2da7ef] mr-3"
+                              title="Editar cliente"
+                            >
                               <Edit size={16} />
                             </button>
-                            <button className="text-red-600 hover:text-red-900">
+                            <button 
+                              onClick={() => handleDeleteClient(client)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Eliminar cliente"
+                            >
                               <Trash2 size={16} />
                             </button>
                           </td>
@@ -536,6 +632,80 @@ const AdminPage = () => {
                   className="px-4 py-2 bg-[#37b7ff] text-white rounded-lg hover:bg-[#2da7ef] transition-colors duration-200"
                 >
                   Crear Cliente
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Editar Cliente */}
+      {showEditClientModal && editingClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Editar Cliente: {editingClient.name}
+            </h3>
+            
+            <form onSubmit={handleUpdateClient} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editClient.name}
+                  onChange={(e) => setEditClient(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
+                  placeholder="Nombre completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editClient.email}
+                  onChange={(e) => setEditClient(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
+                  placeholder="correo@ejemplo.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  value={editClient.phone}
+                  onChange={(e) => setEditClient(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#37b7ff] focus:border-transparent"
+                  placeholder="443 123 4567"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditClientModal(false);
+                    setEditingClient(null);
+                    setEditClient({ name: '', email: '', phone: '' });
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#37b7ff] text-white rounded-lg hover:bg-[#2da7ef] transition-colors duration-200"
+                >
+                  Actualizar Cliente
                 </button>
               </div>
             </form>
