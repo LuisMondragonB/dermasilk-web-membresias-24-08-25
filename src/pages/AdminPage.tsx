@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { supabase } from '../lib/supabase';
+import { Users, CreditCard, Gift, Settings, Plus, LogOut, BarChart3, TrendingUp, Calendar, Star, Search, Filter, Edit, Trash2, Eye, MessageCircle, Phone, Mail, MapPin, Clock, Award, Target, Crown, Sparkles } from 'lucide-react';
 import { 
   Users, 
   UserPlus, 
@@ -95,12 +94,10 @@ const AdminPage = () => {
     }
   }, [navigate]);
   
-  const [clients, setClients] = useState<Client[]>([]);
+  const handleLogout = () => {
   const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [rewardTransactions, setRewardTransactions] = useState<RewardTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showEditClientModal, setShowEditClientModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -229,33 +226,26 @@ const AdminPage = () => {
       
       if (!session) {
         navigate('/login');
-        return;
-      }
-      
-      // También verificar localStorage como respaldo
-      const isAuthenticated = localStorage.getItem('isAuthenticated');
-      const loginTime = localStorage.getItem('loginTime');
-      
-      if (!isAuthenticated || !loginTime) {
-        navigate('/login');
-        return;
-      }
-      
-      // Verificar si la sesión ha expirado (24 horas)
-      const loginDate = new Date(loginTime);
-      const now = new Date();
-      const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60);
-      
-      if (hoursDiff > 24) {
-        await supabase.auth.signOut();
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('loginTime');
-        localStorage.removeItem('userEmail');
-        navigate('/login');
-      }
-    };
+    // Verificar autenticación simple
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const loginTime = localStorage.getItem('loginTime');
     
-    checkAuth();
+    if (!isAuthenticated || !loginTime) {
+      navigate('/login');
+      return;
+    }
+    
+    // Verificar si la sesión ha expirado (24 horas)
+    const loginDate = new Date(loginTime);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursDiff > 24) {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('loginTime');
+      navigate('/login');
+      return;
+    }
   };
 
 
